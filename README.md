@@ -1,4 +1,4 @@
-# Bookmarks App 
+# Laboratory 8 Bookmarks App Modified 
 ## Created by Carlos Tamez Ayala
 ### Server side API with CRUD Methods
 In the this server side aplication, I used the following structure for each bookmark: 
@@ -17,4 +17,6 @@ The middleware have three ways to authorize the usage of the endpoints sending t
 * Authorization Bearer Token.
 * **'book-api-key'** Header.
 * **apiKey** in Params.
+
+The model and the connection to Mongo was implmented on this project.
 

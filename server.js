@@ -1,8 +1,10 @@
 const express = require('express');
 const bodyParser = require('body-parser');
 const morgan = require('morgan');
-const uuidv4 = require('uuid/v4');
+const uuid = require('uuid');
 const keyHandling = require('./middleware/keyHandling');
+const { BookmarkCrud } = require('./models/model');
+const mongoose = require('mongoose');
 
 const api = express();
 const jsonParser = bodyParser.json();
@@ -17,7 +19,7 @@ createBookmark("The Outsider", "A juicy tale that plays at the forefront of our 
 
 //Bookmarks format
 function createBookmark(title, description, url, rating) {
-    const id = uuidv4();
+    const id = uuid.v4();
     const bookmark = {
         id: id,
         title: title,
@@ -29,25 +31,33 @@ function createBookmark(title, description, url, rating) {
 }
 // Get Endpoint to get all Bookmarks
 api.get('/bookmarks', (req, res) => {
-    return res.status(200).json(books);
+    BookmarkCrud.allBookmarks()
+        .then(books => res.status(200).json(books))
+        .catch(err => {
+            res.statusMessage = "Something went wrong with the DB. Try again later";
+            return res.status(500).end();
+        });
 });
 
 // Get Endpoint by Title
 api.get('/bookmark', (req, res) => {
     let title = req.query.title;
-    let titleBooks = books.filter(titles => title === titles.title);
     if (!title) {
         res.statusMessage = "Please send the 'title' as parameter";
         return res.status(406).end();
     }
-    else if (titleBooks.length > 0) {
-        res.statusMessage = `We found ${titleBooks.length} bookmark with the title ${title}`
-        return res.status(200).json(titleBooks);
-    }
-    else {
-        res.statusMessage = `There is no bookmark with the title ${title}`;
-        return res.status(400).end();
-    }
+    return BookmarkCrud.bookmarkTitle(title)
+        .then(bookmarks => {
+            if (bookmarks.length === 0) {
+                res.statusMessage = "No bookmark with that title found";
+                return res.status(400).end();
+            }
+            return res.status(200).json(bookmarks)
+        })
+        .catch(err => {
+            res.statusMessage = "Something went wrong with the DB. Try again later";
+            return res.status(500).end();
+        });
 });
 
 //Post Endpoint
@@ -61,38 +71,46 @@ api.post('/bookmarks', jsonParser, (req, res) => {
         res.statusMessage = "A parameter is missing in the request: 'title', 'description', 'url', or 'rating'";
         return res.status(406).end();
     }
-    else if (typeof (rating) !== 'number') {
+    if (typeof (rating) !== 'number') {
         res.statusMessage = "The rating must be a number";
         return res.status(409).end();
     }
-    else {
-        let newBookmark = createBookmark(title, description, url, rating);
-        books.push(newBookmark);
-        res.statusMessage = "New Bookmark Created";
-        return res.status(201).json(newBookmark);
+    let bookmark = {
+        id: uuid.v4(),
+        title: title,
+        description: description,
+        url: url,
+        rating: rating
     }
+    return BookmarkCrud.postbookmark(bookmark)
+        .then(newBookmark => res.status(201).json(newBookmark))
+        .catch(err => {
+            res.statusMessage = "Something went wrong with the DB. Try again later";
+            return res.status(500).end();
+        });
 });
 
 // Delete Endpoint
 api.delete('/bookmark/:id', (req, res) => {
     let { id } = req.params;
-    for (let i = 0; i <= books.length; i++) {
-        if (books[i].id == id) {
-            books.splice(i, 1);
-            return res.status(200).send();
-        }
-        else {
-            res.statusMessage = "The bookmark does not exist";
-            res.status(404).send();
-        }
-    }
+    BookmarkCrud.delBookmarkId(id)
+        .then(bookmark => {
+            if (!bookmark) {
+                res.statusMessage = "The bookmark does not exist";
+                res.status(404).send();
+            }
+            return res.status(200).end();
+        })
+        .catch(err => {
+            res.statusMessage = "Something went wrong with the DB. Try again later";
+            return res.status(500).end();
+        });
 });
 
 api.patch('/bookmark/:id', jsonParser, (req, res) => {
     let bodyId = req.body.id;
     let parmId = req.params.id
     let { title, description, url, rating } = req.body;
-    let updatedBookmark = {};
     if (!bodyId) {
         res.statusMessage = "Id of bookmark is missing";
         return res.status(406).end();
@@ -105,35 +123,48 @@ api.patch('/bookmark/:id', jsonParser, (req, res) => {
         res.statusMessage = "Empty body";
         return res.status(406).send();
     }
-    books.forEach(element => {
-        if (element.id == bodyId) {
-            if (title) {
-                element.title = title;
-                updatedBookmark.title = title;
-            }
-            if (description) {
-                element.description = description;
-                updatedBookmark.description = description;
-            }
-            if (url) {
-                element.url = url;
-                updatedBookmark.url = url;
-            }
-            if (typeof (rating) !== 'number') {
-                res.statusMessage = "The rating just can be a number";
-                return res.status(409).end();
-            }
-            else {
-                element.rating = rating
-                updatedBookmark.rating = rating;
-            }
-        }
-        res.statusMessage = "Bookmark updated with success";
-        return res.status(202).json(updatedBookmark);
-    });
 
+    let bookmark = {};
+    if (title) bookmark.title = title;
+    if (description) bookmark.description = description;
+    if (url) bookmark.url = url;
+    if (rating) bookmark.rating = rating;
+    return BookmarkCrud.patchBookmarkId(parmId, bookmark)
+        .then(updatedBookmark => {
+            if (!updatedBookmark) {
+                res.statusMessage = "The id does not match with any bookmark";
+                return res.status(404).end;
+            }
+            res.statusMessage = "Bookmark updated with success";
+            return res.status(202).json(updatedBookmark);
+        })
+        .catch(err => {
+            res.statusMessage = "Something went wrong with the DB. Try again later";
+            return res.status(500).end();
+        });
 });
+
 
 api.listen(8080, function () {
     console.log("Server is running at port 8080")
+    new Promise((resolve, reject) => {
+        mongoose.connect("mongodb://localhost/bookmarksdb", {
+            useNewUrlParser: true,
+            useUnifiedTopology: true,
+            useCreateIndex: true
+        }, (err) => {
+            if (err) {
+                reject(err);
+            }
+            else {
+                console.log("bookmarksdb connected successfully")
+                resolve();
+            }
+        })
+    })
+        .catch(err => {
+            mongoose.disconnect();
+            console.log(err);
+        });
+
 });
