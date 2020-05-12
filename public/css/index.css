@@ -1,0 +1,75 @@
+@import url('https://fonts.googleapis.com/css?family=Montserrat&display=swap');
+
+*{
+    margin: 0px;
+    padding: 0px;
+    font-family:'Montserrat', sans-serif;
+    
+}
+body{
+    background: #F3D11A;
+}
+h1{
+    padding: 30px;
+    display: flex;
+    justify-content: center;
+}
+h2{
+    text-align: center;
+    padding: 25px;
+}
+form{
+    padding: 20px;
+    background: linear-gradient(180deg, #FFF4BB 45.83%, rgba(255, 255, 255, 0.5) 100%), #FFF4BB;
+    border-radius: 20px;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-around;
+    align-items: stretch ;
+    margin-right: auto;
+    margin-left: auto;
+    width: 1000px;
+}
+ input{
+    border-radius: 0.5em;
+    border: 2px solid orange;
+    height: 25px;
+    width: 100%;
+}
+button{
+    margin-top: 15px;
+    font-weight: bold;
+    color: white;
+    border-radius: 0.5em;
+    display: flex;
+    flex-direction: row;
+    justify-content: center;
+    align-self: center;
+    width: 98%;
+    background-color: rgb(247, 183, 65);
+    border: none;
+}
+button:hover{
+    opacity: 0.6;
+    cursor: pointer;
+}
+form > *{
+    padding: 10px;
+}
+.bookmark{
+    border: 2px solid #FFF4BB;
+    width: 50%;
+    margin: 10px;
+    border-radius: 0.5em;
+}
+section{
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+  
+}
+li{
+    list-style: none;
+    margin: 5px;
+    padding: 5px;
+}

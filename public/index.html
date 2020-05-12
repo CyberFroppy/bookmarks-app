@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Bookmarks App </title>
+    <link rel="stylesheet" href="./css/index.css">
+</head>
+
+<body>
+    <main>
+        <h1>Bookmarks App</h1>
+        <h2>Post Bookmark</h2>
+        <form class="post-form">
+            <label>Fill all the fields for creating a Bookmark</label>
+            <div>
+                <label for="bookmark-title">Title</label>
+                <input type="text" id="bookmark-title">
+            </div>
+            <div>
+                <label for="bookmark-description">Description</label>
+                <input type="text" id="bookmark-description">
+            </div>
+            <div>
+                <label for="bookmark-url">Url</label>
+                <input type="text" id="bookmark-url">
+            </div>
+            <div>
+                <label for="bookmark-rating">Rating</label>
+                <input type="number" id="bookmark-rating">
+            </div>
+            <button id="post-btn" type="submit">Post Bookmark </button>
+            <span class="post-error"> </span>
+        </form>
+
+        <h2>Delete Bookmark by ID</h2>
+        <form class="delete-form">
+            <div>
+                <label for="delete-id">Id </label>
+                <input type="text" id="delete-id">
+            </div>
+            <button id="delete-btn" type="submit">Delete Bookmark </button>
+            <span class="delete-error"> </span>
+        </form>
+
+        <h2>Update Bookmark</h2>
+        <form class="update-form">
+            <label>Fill the blanks to update a bookmark by ID </label>
+            <div>
+                <label for="bookmark-id">Id</label>
+                <input type="text" id="bookmark-id-u">
+            </div>
+            <div>
+                <label for="bookmark-title">Title</label>
+                <input type="text" id="bookmark-title-u">
+            </div>
+            <div>
+                <label for="bookmark-description">Description</label>
+                <input type="text" id="bookmark-description-u">
+            </div>
+            <div>
+                <label for="bookmark-url">Url</label>
+                <input type="text" id="bookmark-url-u">
+            </div>
+            <div>
+                <label for="bookmark-rating">Rating</label>
+                <input type="number" id="bookmark-rating-u">
+            </div>
+            <button id="update-btn" type="submit">Update Bookmark </button>
+            <span class="update-error"> </span>
+        </form>
+
+
+        <h2>Search by Title</h2>
+        <form class="form-search">
+            <div>
+                <label for="title-search">Title</label>
+                <input type="text" id="title-search">
+            </div>
+            <button id="search-btn" type="submit">Search Bookmark </button>
+            <span class="search-error"> </span>
+        </form>
+
+        <h2>List of Bookmarks</h2>
+        <section class="results">
+
+        </section>
+
+
+    </main>
+
+    <script src="./js/index.js"></script>
+</body>
+
+</html>

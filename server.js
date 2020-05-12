@@ -5,10 +5,11 @@ const uuid = require('uuid');
 const keyHandling = require('./middleware/keyHandling');
 const { BookmarkCrud } = require('./models/model');
 const mongoose = require('mongoose');
-
+const { DATABASE_URL, PORT } = require("./config");
 const api = express();
 const jsonParser = bodyParser.json();
 
+api.use(express.static("public"));
 api.use(morgan('dev'));
 api.use(keyHandling);
 
@@ -34,6 +35,7 @@ api.get('/bookmarks', (req, res) => {
     BookmarkCrud.allBookmarks()
         .then(books => res.status(200).json(books))
         .catch(err => {
+            console.log(err)
             res.statusMessage = "Something went wrong with the DB. Try again later";
             return res.status(500).end();
         });
@@ -49,7 +51,6 @@ api.get('/bookmark', (req, res) => {
     return BookmarkCrud.bookmarkTitle(title)
         .then(bookmarks => {
             if (bookmarks.length === 0) {
-                res.statusMessage = "No bookmark with that title found";
                 return res.status(400).end();
             }
             return res.status(200).json(bookmarks)
@@ -145,10 +146,10 @@ api.patch('/bookmark/:id', jsonParser, (req, res) => {
 });
 
 
-api.listen(8080, function () {
+api.listen(PORT, function () {
     console.log("Server is running at port 8080")
     new Promise((resolve, reject) => {
-        mongoose.connect("mongodb://localhost/bookmarksdb", {
+        mongoose.connect(DATABASE_URL, {
             useNewUrlParser: true,
             useUnifiedTopology: true,
             useCreateIndex: true
@@ -168,3 +169,4 @@ api.listen(8080, function () {
         });
 
 });
+// mongodb + srv://AlphaFraser:Fraser21@@cluster0-v0oyl.mongodb.net/bookmarksdb?retryWrites=true&w=majority
